@@ -1,3 +1,3 @@
 assert('TinyDTLS::ping exists') do
-    TinyDTLS.respond_to?(:ping) and false
+    assert_true(TinyDTLS.respond_to?(:ping), "TinyDTLS is not responding to ::ping")
 end
