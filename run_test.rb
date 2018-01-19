@@ -7,7 +7,7 @@ if __FILE__ == $PROGRAM_NAME
     else true end
   end
 
-  exit false unless git_clone('https://github.com/mruby/mruby.git', 'mruby')
+  exit false unless git_clone('https://github.com/mruby/mruby.git', 'mruby', 'stable')
   exit false unless git_clone('https://github.com/RIOT-Makers/YaCoAP.git', 'yacoap')
 
   build_args = ARGV.join(' ')

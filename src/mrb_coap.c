@@ -30,7 +30,6 @@ mrb_mruby_coap_gem_init(mrb_state *mrb)
   struct RClass *module_coap = mrb_define_module(mrb, "Coap");
   mrb_define_class_method(mrb, module_coap, "ping", mrb_coap_ping, MRB_ARGS_NONE());
 
-  // struct RClass *class_coap_header = mrb_class_get_under(mrb, module_coap, "Header");
   struct RClass *class_coap_header = mrb_define_class_under(mrb, module_coap, "Header", mrb->object_class);
   mrb_define_method(mrb, class_coap_header, "dump", mrb_coap_header_dump, MRB_ARGS_NONE());
 }
