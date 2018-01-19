@@ -1,2 +1,2 @@
-# mruby-tinydtls
-[![Build Status](https://travis-ci.org/lurkshark/mruby-tinydtls.svg?branch=master)](https://travis-ci.org/lurkshark/mruby-tinydtls)
+# mruby-coap
+[![Build Status](https://travis-ci.org/lurkshark/mruby-coap.svg?branch=master)](https://travis-ci.org/lurkshark/mruby-coap)
