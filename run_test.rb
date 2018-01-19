@@ -1,17 +1,23 @@
 #!/usr/bin/env ruby
 if __FILE__ == $PROGRAM_NAME
-    repository, dir = 'https://github.com/mruby/mruby.git', 'tmp/mruby'
+  def git_clone(repository, dir, branch = 'master')
     Dir.mkdir('tmp') unless File.exist?('tmp')
-    unless File.exist?(dir)
-        system("git clone -b stable --single-branch #{repository} #{dir}")
-    end
+    unless File.exist?("tmp/#{dir}")
+      system("git clone -b #{branch} --single-branch #{repository} tmp/#{dir}")
+    else true end
+  end
 
-    build_args = ARGV.join(' ')
-    exit system(%Q[cd #{dir} && MRUBY_CONFIG=#{File.expand_path __FILE__} ruby minirake #{build_args}])
+  exit false unless git_clone('https://github.com/mruby/mruby.git', 'mruby')
+  exit false unless git_clone('https://github.com/RIOT-Makers/YaCoAP.git', 'yacoap')
+
+  build_args = ARGV.join(' ')
+  Dir.mkdir('src/yacoap') unless File.exist?('src/yacoap')
+  exit false unless system(%Q[cp tmp/yacoap/*.c tmp/yacoap/*.h src/yacoap/])
+  exit system(%Q[cd tmp/mruby && MRUBY_CONFIG=#{File.expand_path __FILE__} ruby minirake #{build_args}])
 end
 
 MRuby::Build.new do |conf|
-    toolchain :gcc
-    conf.enable_test
-    conf.gem File.expand_path(File.dirname(__FILE__))
+  toolchain :gcc
+  conf.enable_test
+  conf.gem File.expand_path(File.dirname(__FILE__))
 end
