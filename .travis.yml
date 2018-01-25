@@ -1,6 +1,16 @@
+language: c
+group: stable
+dist: trusty
+os: linux
 before_install:
   - sudo apt-get -qq update
+  - sudo apt-get -qq install autoconf automake libtool
 install:
-  - sudo apt-get -qq install libcoap-1-0
+  - git clone -b master --single-branch https://github.com/obgm/libcoap.git
+  - cd libcoap
+  - ./autogen.sh
+  - ./configure --no-documentation
+  - make
+  - sudo make install
 script:
   - ruby run_test.rb test
