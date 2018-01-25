@@ -10,8 +10,7 @@ install:
   - cd libcoap
   - ./autogen.sh
   - ./configure --disable-examples
-  - make
-  - sudo make install
+  - make && sudo make install
   - cd ..
 script:
   - ruby run_test.rb test
