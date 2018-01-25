@@ -1,6 +1,6 @@
 before_install:
   - sudo apt-get -qq update
 install:
-  - sudo apt-get -qq install libcoap
+  - sudo apt-get -qq install libcoap-1-0
 script:
   - ruby run_test.rb test
