@@ -12,6 +12,6 @@ install:
   - ./configure --disable-examples
   - make
   - sudo make install
-  -- cd ..
+  - cd ..
 script:
   - ruby run_test.rb test
