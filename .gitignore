@@ -2,5 +2,4 @@
 .vscode
 
 # Dependency Staging
-src/yacoap
 tmp
