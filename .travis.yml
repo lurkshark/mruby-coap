@@ -9,7 +9,7 @@ install:
   - git clone -b master --single-branch https://github.com/obgm/libcoap.git
   - cd libcoap
   - ./autogen.sh
-  - ./configure
+  - ./configure --disable-examples
   - make
   - sudo make install
 script:
