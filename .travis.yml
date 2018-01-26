@@ -11,6 +11,6 @@ install:
   - ./autogen.sh
   - ./configure --disable-examples
   - make && sudo make install
-  - cd ..
+  - cd .. && rm -rf libcoap
 script:
   - ruby run_test.rb test
