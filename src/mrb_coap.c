@@ -4,11 +4,23 @@
 #include <stdio.h>
 #include <coap.h>
 
-mrb_value
-mrb_coap_ping(mrb_state *mrb, mrb_value self)
+#define MAX_PDU_LENGTH 1024
+static char buffer[MAX_PDU_LENGTH];
+
+static void
+_handle_response_pdu(struct coap_context_t *ctx, const coap_endpoint_t *local_interface, 
+    const coap_address_t *remote, coap_pdu_t *sent, coap_pdu_t *response, const coap_tid_t id)
 {
-  coap_log(LOG_INFO, "CoAP::ping");
-  return self;
+  unsigned char *data;
+	size_t data_length;
+
+	if (COAP_RESPONSE_CLASS(response->hdr->code) == 2) {
+		if (coap_get_data(response, &data_length, &data)) {
+      data_length = data_length > MAX_PDU_LENGTH ? MAX_PDU_LENGTH : data_length;
+      strncpy(buffer, (char *)data, data_length);
+			buffer[MAX_PDU_LENGTH - 1] = '\0';
+		}
+  }
 }
 
 static int
@@ -36,8 +48,11 @@ mrb_coap_client_send(mrb_state *mrb, mrb_value self)
   /* libcoap */
   coap_context_t *ctx;
   coap_pdu_t *request;
-  coap_address_t src, dst;
-  
+  coap_address_t local, remote;
+
+  /* for getting response */
+  fd_set read_fds;  
+
   /* arguments from method call */
   mrb_int port;
   mrb_sym method, type;
@@ -46,21 +61,22 @@ mrb_coap_client_send(mrb_state *mrb, mrb_value self)
 
   mrb_get_args(mrb, "nzizn", &method, &remote_hostname, &port, &resource_path, &type);
 
-  coap_address_init(&dst);
+  coap_address_init(&remote);
   /* resolve the destination first to figure out IPv6 or IPv4 */
-  dst.size = _resolve_hostname(remote_hostname, &dst.addr.sa);
-  dst.addr.sin.sin_port = htons(port);
+  remote.size = _resolve_hostname(remote_hostname, &remote.addr.sa);
+  remote.addr.sin.sin_port = htons(port);
 
-  coap_address_init(&src);
+  coap_address_init(&local);
+  local.addr.sin.sin_port = htons(0);
   /* set an IPv6 source if needed, otherwise IPv4 */
-  if (dst.addr.sa.sa_family == AF_INET6) {
-    src.size = _resolve_hostname("::", &src.addr.sa);
+  if (remote.addr.sa.sa_family == AF_INET6) {
+    local.size = _resolve_hostname("::", &local.addr.sa);
   } else {
-    src.size = _resolve_hostname("0.0.0.0", &src.addr.sa);
+    local.size = _resolve_hostname("0.0.0.0", &local.addr.sa);
   }
   
   /* setup our coap client context */
-  ctx = coap_new_context(&src);
+  ctx = coap_new_context(&local);
 
   request = coap_new_pdu();
   request->hdr->type  = COAP_MESSAGE_CON;
@@ -68,20 +84,28 @@ mrb_coap_client_send(mrb_state *mrb, mrb_value self)
 	request->hdr->code  = 1;
 
   coap_add_option(request, COAP_OPTION_URI_PATH, strlen(resource_path), (unsigned char *)resource_path);
-  coap_send_confirmed(ctx, ctx->endpoint, &dst, request);
+  coap_register_response_handler(ctx, _handle_response_pdu);
+  coap_send_confirmed(ctx, ctx->endpoint, &remote, request);
 
+  while (!coap_can_exit(ctx)) {
+    FD_ZERO(&read_fds);
+    FD_SET(ctx->sockfd, &read_fds);
+    if (select(FD_SETSIZE, &read_fds, 0, 0, NULL) > 0 && FD_ISSET(ctx->sockfd, &read_fds)) {
+      coap_read(ctx);
+    }
+  }
+
+  mrb_value response = mrb_str_new(mrb, buffer, strlen(buffer));
   coap_free_context(ctx);
-  return self;
+  return response;
 }
 
 void
 mrb_mruby_coap_gem_init(mrb_state *mrb)
 {
   struct RClass *module_coap = mrb_define_module(mrb, "CoAP");
-  mrb_define_class_method(mrb, module_coap, "ping", mrb_coap_ping, MRB_ARGS_NONE());
-
   struct RClass *class_coap_client = mrb_define_class_under(mrb, module_coap, "Client", mrb->object_class);
-  mrb_define_class_method(mrb, class_coap_client, "send", mrb_coap_client_send, MRB_ARGS_REQ(5));
+  mrb_define_class_method(mrb, class_coap_client, "_send", mrb_coap_client_send, MRB_ARGS_REQ(5));
 }
 
 void
