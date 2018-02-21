@@ -4,5 +4,10 @@ COAP_TEST_SERVER = "coap.me"
 
 assert("TD_COAP_CORE_01") do
   response = CoAP::Client.get(COAP_TEST_SERVER, "test")
-  assert_true response.include?("welcome to the ETSI plugtest!"), "Response did not contain expected string"
+  assert_include response, "welcome to the ETSI plugtest!"
+end
+
+assert("TD_COAP_CORE_04") do
+  response = CoAP::Client.delete(COAP_TEST_SERVER, "test")
+  assert_equal "DELETE OK", response
 end
