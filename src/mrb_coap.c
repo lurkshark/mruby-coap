@@ -57,11 +57,12 @@ mrb_coap_client_send(mrb_state *mrb, mrb_value self)
   mrb_int method, type;
   char *remote_hostname;
   char *resource_path;
+  char *payload;
 
   /* return data */
   mrb_value response;
 
-  mrb_get_args(mrb, "izizi", &method, &remote_hostname, &port, &resource_path, &type);
+  mrb_get_args(mrb, "iziziz!", &method, &remote_hostname, &port, &resource_path, &type, &payload);
 
   coap_address_init(&remote);
   /* resolve the destination first to figure out IPv6 or IPv4 */
@@ -82,6 +83,10 @@ mrb_coap_client_send(mrb_state *mrb, mrb_value self)
 
   request = coap_pdu_init(type, method, coap_new_message_id(ctx), COAP_MAX_PDU_SIZE);
   coap_add_option(request, COAP_OPTION_URI_PATH, strlen(resource_path), (unsigned char *)resource_path);
+  if (payload != NULL) {
+    coap_add_data(request, strlen(payload), payload);
+  }
+
   coap_register_response_handler(ctx, _handle_response_pdu);
   coap_send_confirmed(ctx, ctx->endpoint, &remote, request);
 
@@ -103,10 +108,11 @@ mrb_mruby_coap_gem_init(mrb_state *mrb)
 {
   struct RClass *module_coap = mrb_define_module(mrb, "CoAP");
   struct RClass *class_coap_client = mrb_define_class_under(mrb, module_coap, "Client", mrb->object_class);
-  mrb_define_class_method(mrb, class_coap_client, "_send", mrb_coap_client_send, MRB_ARGS_REQ(5));
+  mrb_define_class_method(mrb, class_coap_client, "_send", mrb_coap_client_send, MRB_ARGS_REQ(6));
 
   mrb_define_const(mrb, class_coap_client, "CON", mrb_fixnum_value(COAP_MESSAGE_CON));
   mrb_define_const(mrb, class_coap_client, "GET", mrb_fixnum_value(COAP_REQUEST_GET));
+  mrb_define_const(mrb, class_coap_client, "POST", mrb_fixnum_value(COAP_REQUEST_POST));
   mrb_define_const(mrb, class_coap_client, "DELETE", mrb_fixnum_value(COAP_REQUEST_DELETE));
 }
 

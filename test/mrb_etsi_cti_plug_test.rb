@@ -7,6 +7,11 @@ assert("TD_COAP_CORE_01") do
   assert_include response, "welcome to the ETSI plugtest!"
 end
 
+assert("TD_COAP_CORE_02") do
+  response = CoAP::Client.post(COAP_TEST_SERVER, "test", "PAYLOAD")
+  assert_equal "POST OK", response
+end
+
 assert("TD_COAP_CORE_04") do
   response = CoAP::Client.delete(COAP_TEST_SERVER, "test")
   assert_equal "DELETE OK", response
