@@ -48,6 +48,7 @@ mrb_coap_client_send(mrb_state *mrb, mrb_value self)
   coap_context_t *ctx;
   coap_pdu_t *request;
   coap_address_t local, remote;
+  unsigned char option_buffer[3];
 
   /* for getting response */
   fd_set read_fds;  
@@ -84,6 +85,8 @@ mrb_coap_client_send(mrb_state *mrb, mrb_value self)
   request = coap_pdu_init(type, method, coap_new_message_id(ctx), COAP_MAX_PDU_SIZE);
   coap_add_option(request, COAP_OPTION_URI_PATH, strlen(resource_path), (unsigned char *)resource_path);
   if (payload != NULL) {
+    coap_add_option(request, COAP_OPTION_CONTENT_TYPE,
+        coap_encode_var_bytes(option_buffer, COAP_MEDIATYPE_TEXT_PLAIN), option_buffer);
     coap_add_data(request, strlen(payload), payload);
   }
 
@@ -113,6 +116,7 @@ mrb_mruby_coap_gem_init(mrb_state *mrb)
   mrb_define_const(mrb, class_coap_client, "CON", mrb_fixnum_value(COAP_MESSAGE_CON));
   mrb_define_const(mrb, class_coap_client, "GET", mrb_fixnum_value(COAP_REQUEST_GET));
   mrb_define_const(mrb, class_coap_client, "POST", mrb_fixnum_value(COAP_REQUEST_POST));
+  mrb_define_const(mrb, class_coap_client, "PUT", mrb_fixnum_value(COAP_REQUEST_PUT));
   mrb_define_const(mrb, class_coap_client, "DELETE", mrb_fixnum_value(COAP_REQUEST_DELETE));
 }
 

@@ -16,6 +16,12 @@ module CoAP
       _send(POST, host, port, path, type, payload.to_s)
     end
 
+    def self.put(host, path, payload, options = {})
+      port = options[:port] || DEFAULT_PORT
+      type = options[:type] || DEFAULT_TYPE
+      _send(PUT, host, port, path, type, payload.to_s)
+    end
+
     def self.delete(host, path, options = {})
       port = options[:port] || DEFAULT_PORT
       type = options[:type] || DEFAULT_TYPE

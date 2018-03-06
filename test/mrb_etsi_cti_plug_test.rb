@@ -12,6 +12,11 @@ assert("TD_COAP_CORE_02") do
   assert_equal "POST OK", response
 end
 
+assert("TD_COAP_CORE_03") do
+  response = CoAP::Client.put(COAP_TEST_SERVER, "test", "PAYLOAD")
+  assert_equal "PUT OK", response
+end
+
 assert("TD_COAP_CORE_04") do
   response = CoAP::Client.delete(COAP_TEST_SERVER, "test")
   assert_equal "DELETE OK", response
