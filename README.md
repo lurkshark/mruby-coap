@@ -1,5 +1,5 @@
 # mruby-coap
-[![Build Status](https://travis-ci.org/lurkshark/mruby-coap.svg?branch=master)](https://travis-ci.org/lurkshark/mruby-coap)
+[![Build Status](https://travis-ci.com/lurkshark/mruby-coap.svg?branch=master)](https://travis-ci.com/lurkshark/mruby-coap)
 
 ## Installing
 
